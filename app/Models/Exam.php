@@ -2,6 +2,7 @@
 
 namespace App\Models;
 
+use Database\Factories\ExamFactory;
 use Illuminate\Database\Eloquent\Attributes\Fillable;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
@@ -27,7 +28,7 @@ class Exam extends Model
 
     public const AUTO_SUBMIT = 'auto_submit';
 
-    /** @use HasFactory<\Database\Factories\ExamFactory> */
+    /** @use HasFactory<ExamFactory> */
     use HasFactory;
 
     public function subject(): BelongsTo
@@ -42,7 +43,7 @@ class Exam extends Model
 
     public function classes(): BelongsToMany
     {
-        return $this->belongsToMany(SchoolClass::class, 'exam_classes');
+        return $this->belongsToMany(SchoolClass::class, 'exam_classes', 'exam_id', 'class_id');
     }
 
     public function examClasses(): HasMany

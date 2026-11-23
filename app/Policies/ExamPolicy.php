@@ -1,0 +1,39 @@
+<?php
+
+namespace App\Policies;
+
+use App\Models\Exam;
+use App\Models\User;
+
+class ExamPolicy
+{
+    public function before(User $user, string $ability): ?bool
+    {
+        return $user->isAdmin() ? true : null;
+    }
+
+    public function viewAny(User $user): bool
+    {
+        return $user->isGuru();
+    }
+
+    public function view(User $user, Exam $exam): bool
+    {
+        return $exam->created_by === $user->id;
+    }
+
+    public function create(User $user): bool
+    {
+        return $user->isGuru();
+    }
+
+    public function update(User $user, Exam $exam): bool
+    {
+        return $exam->created_by === $user->id;
+    }
+
+    public function delete(User $user, Exam $exam): bool
+    {
+        return $exam->created_by === $user->id;
+    }
+}

@@ -2,8 +2,12 @@
     <x-slot name="header">Ringkasan Guru</x-slot>
 
     <div class="grid gap-4 sm:grid-cols-2 lg:grid-cols-3">
-        <x-card title="Bank Soal & Ujian" subtitle="Tahap 2">
+        <x-card title="Bank Soal & Ujian" subtitle="Tersedia">
             <p class="text-sm leading-6 text-slate-600">Buat soal PG, isian, dan esai, lalu susun ujian beserta kelas pesertanya.</p>
+            <div class="mt-4 flex flex-wrap gap-2">
+                <x-button size="sm" :href="route('guru.questions.index')">Bank Soal</x-button>
+                <x-button size="sm" variant="secondary" :href="route('guru.exams.index')">Ujian</x-button>
+            </div>
         </x-card>
         <x-card title="Pengawasan" subtitle="Tahap 4">
             <p class="text-sm leading-6 text-slate-600">Alert pelanggaran siswa akan tampil di sini secara real-time dengan polling.</p>

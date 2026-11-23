@@ -2,12 +2,14 @@
 
 namespace App\Models;
 
+use Database\Factories\ExamSessionFactory;
 use Illuminate\Database\Eloquent\Attributes\Fillable;
 use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
 use Illuminate\Database\Eloquent\Relations\HasMany;
+use Illuminate\Support\Carbon;
 
 #[Fillable([
     'exam_id',
@@ -29,7 +31,7 @@ class ExamSession extends Model
 
     public const DISKUALIFIKASI = 'diskualifikasi';
 
-    /** @use HasFactory<\Database\Factories\ExamSessionFactory> */
+    /** @use HasFactory<ExamSessionFactory> */
     use HasFactory;
 
     public function exam(): BelongsTo
@@ -50,6 +52,16 @@ class ExamSession extends Model
     public function violations(): HasMany
     {
         return $this->hasMany(Violation::class, 'session_id');
+    }
+
+    public function deadline(): Carbon
+    {
+        return $this->started_at->copy()->addMinutes($this->exam->duration_min)->min($this->exam->end_at);
+    }
+
+    public function remainingSeconds(): int
+    {
+        return max(0, $this->deadline()->getTimestamp() - now()->getTimestamp());
     }
 
     /**

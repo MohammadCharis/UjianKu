@@ -8,7 +8,22 @@
         'Segoe UI Symbol', 'Noto Color Emoji';
     --color-brand-50: oklch(0.97 0.02 220);
     --color-brand-100: oklch(0.93 0.04 220);
+    --color-brand-300: oklch(0.78 0.08 220);
     --color-brand-500: oklch(0.62 0.15 220);
     --color-brand-600: oklch(0.53 0.16 220);
     --color-brand-700: oklch(0.45 0.14 220);
+}
+
+@layer components {
+    [data-question-goto][data-answered='true'] {
+        @apply border-brand-300 bg-brand-50 text-brand-700;
+    }
+
+    [data-question-goto][data-doubtful='true'] {
+        @apply ring-2 ring-amber-400;
+    }
+
+    [data-question-goto][data-current='true'] {
+        @apply border-brand-500 font-bold;
+    }
 }

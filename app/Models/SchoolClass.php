@@ -2,6 +2,7 @@
 
 namespace App\Models;
 
+use Database\Factories\SchoolClassFactory;
 use Illuminate\Database\Eloquent\Attributes\Fillable;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
@@ -11,7 +12,7 @@ use Illuminate\Database\Eloquent\Relations\HasMany;
 #[Fillable(['name', 'grade'])]
 class SchoolClass extends Model
 {
-    /** @use HasFactory<\Database\Factories\SchoolClassFactory> */
+    /** @use HasFactory<SchoolClassFactory> */
     use HasFactory;
 
     protected $table = 'classes';
@@ -28,6 +29,6 @@ class SchoolClass extends Model
 
     public function exams(): BelongsToMany
     {
-        return $this->belongsToMany(Exam::class, 'exam_classes');
+        return $this->belongsToMany(Exam::class, 'exam_classes', 'class_id', 'exam_id');
     }
 }

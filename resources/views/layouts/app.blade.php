@@ -44,9 +44,21 @@
 
         @php
             $links = match (auth()->user()->role) {
-                'admin' => [['label' => 'Ringkasan', 'route' => route('admin.index')]],
-                'guru' => [['label' => 'Ringkasan', 'route' => route('guru.index')]],
-                default => [['label' => 'Ringkasan', 'route' => route('siswa.index')]],
+                'admin' => [
+                    ['label' => 'Ringkasan', 'route' => route('admin.index'), 'pattern' => 'admin.index'],
+                    ['label' => 'Kelas', 'route' => route('admin.classes.index'), 'pattern' => 'admin.classes.*'],
+                    ['label' => 'Mata Pelajaran', 'route' => route('admin.subjects.index'), 'pattern' => 'admin.subjects.*'],
+                    ['label' => 'Guru', 'route' => route('admin.teachers.index'), 'pattern' => 'admin.teachers.*'],
+                    ['label' => 'Siswa', 'route' => route('admin.students.index'), 'pattern' => 'admin.students.*'],
+                ],
+                'guru' => [
+                    ['label' => 'Ringkasan', 'route' => route('guru.index'), 'pattern' => 'guru.index'],
+                    ['label' => 'Bank Soal', 'route' => route('guru.questions.index'), 'pattern' => 'guru.questions.*'],
+                    ['label' => 'Ujian', 'route' => route('guru.exams.index'), 'pattern' => 'guru.exams.*'],
+                ],
+                default => [
+                    ['label' => 'Ringkasan', 'route' => route('siswa.index'), 'pattern' => 'siswa.index'],
+                ],
             };
         @endphp
 
@@ -55,14 +67,11 @@
             @foreach ($links as $link)
                 <a
                     href="{{ $link['route'] }}"
-                    class="flex min-h-11 items-center rounded-xl px-3 text-sm font-medium transition {{ request()->url() === $link['route'] ? 'bg-brand-50 text-brand-700' : 'text-slate-600 hover:bg-slate-100' }}"
+                    class="flex min-h-11 items-center rounded-xl px-3 text-sm font-medium transition {{ request()->routeIs($link['pattern']) ? 'bg-brand-50 text-brand-700' : 'text-slate-600 hover:bg-slate-100' }}"
                 >
                     {{ $link['label'] }}
                 </a>
             @endforeach
-            <a href="{{ route('dashboard') }}" class="flex min-h-11 items-center rounded-xl px-3 text-sm font-medium text-slate-600 transition hover:bg-slate-100">
-                Dashboard Umum
-            </a>
         </nav>
 
         <div class="border-t border-slate-200 p-3">
