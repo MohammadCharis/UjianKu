@@ -8,6 +8,7 @@ use App\Http\Requests\Siswa\JoinExamRequest;
 use App\Http\Requests\Siswa\SubmitExamRequest;
 use App\Models\Exam;
 use App\Models\ExamSession;
+use App\Models\Violation;
 use App\Services\ExamGradingService;
 use Illuminate\Http\JsonResponse;
 use Illuminate\Http\RedirectResponse;

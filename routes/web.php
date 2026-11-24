@@ -8,6 +8,7 @@ use App\Http\Controllers\Admin\SubjectController as AdminSubjectController;
 use App\Http\Controllers\Admin\TeacherController as AdminTeacherController;
 use App\Http\Controllers\Guru\DashboardController as GuruDashboardController;
 use App\Http\Controllers\Guru\ExamController as GuruExamController;
+use App\Http\Controllers\Guru\MonitoringController as GuruMonitoringController;
 use App\Http\Controllers\Guru\QuestionController as GuruQuestionController;
 use App\Http\Controllers\ProfileController;
 use App\Http\Controllers\Siswa\DashboardController as SiswaDashboardController;
@@ -48,6 +49,13 @@ Route::middleware(['auth', 'verified', 'role:guru'])
 
         Route::resource('questions', GuruQuestionController::class)->except(['show']);
         Route::resource('exams', GuruExamController::class)->except(['show']);
+
+        Route::get('monitoring', [GuruMonitoringController::class, 'index'])->name('monitoring.index');
+        Route::get('monitoring/data', [GuruMonitoringController::class, 'data'])->name('monitoring.data');
+        Route::post('monitoring/sessions/{examSession}/unlock', [GuruMonitoringController::class, 'unlock'])->name('monitoring.unlock');
+        Route::post('monitoring/sessions/{examSession}/add-time', [GuruMonitoringController::class, 'addTime'])->name('monitoring.add-time');
+        Route::post('monitoring/sessions/{examSession}/warn', [GuruMonitoringController::class, 'warn'])->name('monitoring.warn');
+        Route::post('monitoring/sessions/{examSession}/disqualify', [GuruMonitoringController::class, 'disqualify'])->name('monitoring.disqualify');
     });
 
 Route::middleware(['auth', 'verified', 'role:siswa'])
@@ -63,6 +71,9 @@ Route::middleware(['auth', 'verified', 'role:siswa'])
             ->middleware('throttle:answers')
             ->name('exams.answers');
         Route::post('exams/{examSession}/heartbeat', [SiswaExamController::class, 'heartbeat'])->name('exams.heartbeat');
+        Route::post('exams/{examSession}/violations', [SiswaExamController::class, 'recordViolation'])
+            ->middleware('throttle:violations')
+            ->name('exams.violations');
         Route::post('exams/{examSession}/submit', [SiswaExamController::class, 'submit'])->name('exams.submit');
         Route::get('exams/{examSession}/result', [SiswaExamController::class, 'result'])->name('exams.result');
     });
