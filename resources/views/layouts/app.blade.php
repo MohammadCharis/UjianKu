@@ -50,12 +50,15 @@
                     ['label' => 'Mata Pelajaran', 'route' => route('admin.subjects.index'), 'pattern' => 'admin.subjects.*'],
                     ['label' => 'Guru', 'route' => route('admin.teachers.index'), 'pattern' => 'admin.teachers.*'],
                     ['label' => 'Siswa', 'route' => route('admin.students.index'), 'pattern' => 'admin.students.*'],
+                    ['label' => 'Laporan', 'route' => route('admin.reports.index'), 'pattern' => 'admin.reports.*'],
                 ],
                 'guru' => [
                     ['label' => 'Ringkasan', 'route' => route('guru.index'), 'pattern' => 'guru.index'],
                     ['label' => 'Bank Soal', 'route' => route('guru.questions.index'), 'pattern' => 'guru.questions.*'],
                     ['label' => 'Ujian', 'route' => route('guru.exams.index'), 'pattern' => 'guru.exams.*'],
+                    ['label' => 'Koreksi Esai', 'route' => route('guru.grading.index'), 'pattern' => 'guru.grading.*'],
                     ['label' => 'Pengawasan', 'route' => route('guru.monitoring.index'), 'pattern' => 'guru.monitoring.*'],
+                    ['label' => 'Laporan', 'route' => route('guru.reports.index'), 'pattern' => 'guru.reports.*'],
                 ],
                 default => [
                     ['label' => 'Ringkasan', 'route' => route('siswa.index'), 'pattern' => 'siswa.index'],
