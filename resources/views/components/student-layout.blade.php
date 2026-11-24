@@ -4,6 +4,10 @@
     <meta charset="utf-8">
     <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
     <meta name="theme-color" content="#0f172a">
+    <meta name="apple-mobile-web-app-capable" content="yes">
+    <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+    <link rel="manifest" href="/manifest.json">
+    <link rel="apple-touch-icon" href="/icons/icon-192.png">
     <meta name="csrf-token" content="{{ csrf_token() }}">
 
     <title>{{ $title ?? config('app.name', 'UjianKu') }}</title>
@@ -23,6 +27,7 @@
                 </div>
 
                 <div class="flex shrink-0 items-center gap-2">
+                    <button type="button" data-install-app class="hidden min-h-9 rounded-xl bg-brand-600 px-3 text-xs font-semibold text-white">Pasang</button>
                     @isset($timer)
                         {{ $timer }}
                     @endisset
