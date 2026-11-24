@@ -11,13 +11,16 @@ class StageSixPwaAndSecurityTest extends TestCase
 
     public function test_pwa_assets_are_available(): void
     {
-        $this->get('/manifest.json')
-            ->assertOk()
-            ->assertJsonFragment(['short_name' => 'UjianKu']);
+        $this->assertFileExists(public_path('manifest.json'));
+        $this->assertFileExists(public_path('sw.js'));
+        $this->assertFileExists(public_path('offline.html'));
+        $this->assertFileExists(public_path('icons/icon-192.png'));
+        $this->assertFileExists(public_path('icons/icon-512.png'));
 
-        $this->get('/sw.js')->assertOk();
-        $this->get('/offline.html')->assertOk();
-        $this->get('/icons/icon-192.png')->assertOk();
+        $manifest = json_decode(file_get_contents(public_path('manifest.json')), true);
+
+        $this->assertSame('UjianKu', $manifest['short_name']);
+        $this->assertSame('standalone', $manifest['display']);
     }
 
     public function test_security_headers_are_present(): void
