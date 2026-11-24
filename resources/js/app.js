@@ -376,6 +376,19 @@ examSessions.forEach((root) => {
             }
             const data = await response.json();
             deadline = Number(data.server_now_ms) + Number(data.remaining_seconds) * 1000;
+
+            if (data.session_status === 'terkunci' && root.dataset.locked !== 'true') {
+                const overlay = root.querySelector('[data-lock-overlay]');
+                if (overlay) {
+                    overlay.classList.remove('hidden');
+                    overlay.classList.add('flex');
+                }
+                root.dataset.locked = 'true';
+            }
+
+            if (data.session_status === 'berlangsung' && root.dataset.locked === 'true') {
+                window.location.reload();
+            }
         } catch {
             setSaveStatus('Sinkronisasi tertunda');
         }
@@ -394,4 +407,182 @@ examSessions.forEach((root) => {
     window.setInterval(syncTimer, 30000);
     syncTimer();
     flushQueue(root);
+
+    if (root.dataset.locked === 'true') {
+        const initialOverlay = root.querySelector('[data-lock-overlay]');
+        if (initialOverlay) {
+            initialOverlay.classList.remove('hidden');
+            initialOverlay.classList.add('flex');
+        }
+    }
+
+    let pendingViolation = null;
+    const isMobile = /Android|iPhone|iPad|iPod/i.test(navigator.userAgent) || window.matchMedia('(max-width: 768px)').matches;
+
+    const showViolationPopup = (count, max, type) => {
+        const countElement = document.querySelector('[data-violation-count]');
+        const maxElement = document.querySelector('[data-violation-max]');
+        const typeElement = document.querySelector('[data-violation-type]');
+        if (countElement) countElement.textContent = count;
+        if (maxElement) maxElement.textContent = max;
+        if (typeElement) typeElement.textContent = type.replaceAll('_', ' ');
+        openOverlay('violation-warning');
+    };
+
+    const lockScreen = () => {
+        const overlay = root.querySelector('[data-lock-overlay]');
+        if (overlay) {
+            overlay.classList.remove('hidden');
+            overlay.classList.add('flex');
+        }
+        root.dataset.locked = 'true';
+    };
+
+    const sendViolation = async (type, duration, violationId = null) => {
+        const payload = { type, duration_seconds: duration };
+        if (violationId) {
+            payload.violation_id = violationId;
+        }
+
+        try {
+            const response = await window.UjianKu.request(root.dataset.violationUrl, {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify(payload),
+            });
+
+            if (!response.ok) {
+                throw new Error('Network response was not ok');
+            }
+
+            const data = await response.json();
+
+            if (data.status === 'recorded') {
+                showViolationPopup(data.violation_count, data.max_violations, type);
+            }
+
+            if (data.locked) {
+                lockScreen();
+            }
+
+            if (data.auto_submitted && data.redirect) {
+                window.location.assign(data.redirect);
+            }
+
+            return data;
+        } catch {
+            setSaveStatus('Gagal mencatat pelanggaran');
+            return null;
+        }
+    };
+
+    const startPendingViolation = (type) => {
+        if (root.dataset.locked === 'true' || pendingViolation) {
+            return;
+        }
+
+        pendingViolation = {
+            type,
+            startedAt: Date.now(),
+            recorded: false,
+            id: null,
+            timer: window.setTimeout(async () => {
+                if (!pendingViolation || root.dataset.locked === 'true') {
+                    return;
+                }
+
+                if (type === 'pindah_tab' && !document.hidden) {
+                    return;
+                }
+
+                const data = await sendViolation(type, 0);
+                if (data) {
+                    pendingViolation.recorded = true;
+                    pendingViolation.id = data.violation_id;
+                }
+            }, 3000),
+        };
+    };
+
+    const finishPendingViolation = async () => {
+        if (!pendingViolation) {
+            return;
+        }
+
+        window.clearTimeout(pendingViolation.timer);
+
+        if (pendingViolation.recorded && pendingViolation.id) {
+            const duration = Math.max(0, Math.round((Date.now() - pendingViolation.startedAt) / 1000));
+            await sendViolation(pendingViolation.type, duration, pendingViolation.id);
+        }
+
+        pendingViolation = null;
+    };
+
+    document.addEventListener('visibilitychange', () => {
+        if (document.hidden) {
+            startPendingViolation('pindah_tab');
+        } else {
+            finishPendingViolation();
+        }
+    });
+
+    if (!isMobile) {
+        window.addEventListener('blur', () => {
+            if (document.querySelector('dialog[open]')) {
+                return;
+            }
+            startPendingViolation('keluar_fokus');
+        });
+
+        window.addEventListener('focus', () => {
+            finishPendingViolation();
+        });
+
+        document.addEventListener('fullscreenchange', () => {
+            if (document.fullscreenElement) {
+                root.dataset.wasFullscreen = 'true';
+                return;
+            }
+
+            if (root.dataset.wasFullscreen === 'true') {
+                startPendingViolation('keluar_fullscreen');
+                window.setTimeout(finishPendingViolation, 3000);
+                root.dataset.wasFullscreen = 'false';
+            }
+        });
+
+        document.documentElement.requestFullscreen?.().catch(() => {});
+
+        const recordImmediateViolation = (type) => {
+            if (root.dataset.locked === 'true') {
+                return;
+            }
+            sendViolation(type, 0);
+        };
+
+        document.addEventListener('copy', (event) => {
+            event.preventDefault();
+            recordImmediateViolation('copy');
+        });
+
+        document.addEventListener('paste', (event) => {
+            event.preventDefault();
+            recordImmediateViolation('paste');
+        });
+
+        document.addEventListener('contextmenu', (event) => {
+            event.preventDefault();
+            recordImmediateViolation('klik_kanan');
+        });
+
+        document.addEventListener('keydown', (event) => {
+            const usesShortcut = (event.ctrlKey || event.metaKey) && ['c', 'v', 'u'].includes(event.key.toLowerCase());
+
+            if (usesShortcut || event.key === 'F12' || event.key === 'PrintScreen') {
+                event.preventDefault();
+                recordImmediateViolation('shortcut');
+            }
+        });
+    }
 });

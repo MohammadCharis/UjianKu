@@ -7,6 +7,7 @@
             <div class="mt-4 flex flex-wrap gap-2">
                 <x-button size="sm" :href="route('guru.questions.index')">Bank Soal</x-button>
                 <x-button size="sm" variant="secondary" :href="route('guru.exams.index')">Ujian</x-button>
+                <x-button size="sm" variant="secondary" :href="route('guru.monitoring.index')">Pengawasan</x-button>
             </div>
         </x-card>
         <x-card title="Pengawasan" subtitle="Tahap 4">
