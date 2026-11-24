@@ -8,7 +8,9 @@ use App\Http\Controllers\Admin\SubjectController as AdminSubjectController;
 use App\Http\Controllers\Admin\TeacherController as AdminTeacherController;
 use App\Http\Controllers\Guru\DashboardController as GuruDashboardController;
 use App\Http\Controllers\Guru\ExamController as GuruExamController;
+use App\Http\Controllers\Guru\GradingController as GuruGradingController;
 use App\Http\Controllers\Guru\MonitoringController as GuruMonitoringController;
+use App\Http\Controllers\Reports\ReportController as ReportsReportController;
 use App\Http\Controllers\Guru\QuestionController as GuruQuestionController;
 use App\Http\Controllers\ProfileController;
 use App\Http\Controllers\Siswa\DashboardController as SiswaDashboardController;
@@ -39,6 +41,11 @@ Route::middleware(['auth', 'verified', 'role:admin'])
         Route::post('students/import', [AdminStudentImportController::class, 'store'])->name('students.import.store');
         Route::get('students/import/template', [AdminStudentImportController::class, 'template'])->name('students.import.template');
         Route::resource('students', AdminStudentController::class)->except(['show']);
+
+        Route::get('reports', [ReportsReportController::class, 'index'])->name('reports.index');
+        Route::get('reports/export/excel', [ReportsReportController::class, 'exportExcel'])->name('reports.export.excel');
+        Route::get('reports/export/pdf', [ReportsReportController::class, 'exportPdf'])->name('reports.export.pdf');
+        Route::get('reports/export/violations', [ReportsReportController::class, 'exportViolations'])->name('reports.export.violations');
     });
 
 Route::middleware(['auth', 'verified', 'role:guru'])
@@ -49,6 +56,15 @@ Route::middleware(['auth', 'verified', 'role:guru'])
 
         Route::resource('questions', GuruQuestionController::class)->except(['show']);
         Route::resource('exams', GuruExamController::class)->except(['show']);
+
+        Route::get('grading', [GuruGradingController::class, 'index'])->name('grading.index');
+        Route::get('grading/{examSession}', [GuruGradingController::class, 'edit'])->name('grading.edit');
+        Route::put('grading/{examSession}', [GuruGradingController::class, 'update'])->name('grading.update');
+
+        Route::get('reports', [ReportsReportController::class, 'index'])->name('reports.index');
+        Route::get('reports/export/excel', [ReportsReportController::class, 'exportExcel'])->name('reports.export.excel');
+        Route::get('reports/export/pdf', [ReportsReportController::class, 'exportPdf'])->name('reports.export.pdf');
+        Route::get('reports/export/violations', [ReportsReportController::class, 'exportViolations'])->name('reports.export.violations');
 
         Route::get('monitoring', [GuruMonitoringController::class, 'index'])->name('monitoring.index');
         Route::get('monitoring/data', [GuruMonitoringController::class, 'data'])->name('monitoring.data');

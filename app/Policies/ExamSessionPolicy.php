@@ -9,7 +9,12 @@ class ExamSessionPolicy
 {
     public function view(User $user, ExamSession $examSession): bool
     {
-        return $this->isOwner($user, $examSession);
+        return $user->isAdmin() || $this->isOwner($user, $examSession);
+    }
+
+    public function grade(User $user, ExamSession $examSession): bool
+    {
+        return $user->isAdmin() || $this->isOwner($user, $examSession);
     }
 
     public function answer(User $user, ExamSession $examSession): bool
