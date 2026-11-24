@@ -586,3 +586,30 @@ examSessions.forEach((root) => {
         });
     }
 });
+
+if ('serviceWorker' in navigator) {
+    window.addEventListener('load', () => {
+        navigator.serviceWorker.register('/sw.js').catch(() => {});
+    });
+}
+
+let deferredInstallPrompt = null;
+
+window.addEventListener('beforeinstallprompt', (event) => {
+    event.preventDefault();
+    deferredInstallPrompt = event;
+    document.querySelectorAll('[data-install-app]').forEach((button) => button.classList.remove('hidden'));
+});
+
+document.addEventListener('click', (event) => {
+    const button = event.target.closest('[data-install-app]');
+    if (!button || !deferredInstallPrompt) {
+        return;
+    }
+
+    deferredInstallPrompt.prompt();
+    deferredInstallPrompt.userChoice.finally(() => {
+        deferredInstallPrompt = null;
+        button.classList.add('hidden');
+    });
+});

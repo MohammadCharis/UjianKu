@@ -4,6 +4,10 @@
     <meta charset="utf-8">
     <meta name="viewport" content="width=device-width, initial-scale=1">
     <meta name="theme-color" content="#0f172a">
+    <meta name="apple-mobile-web-app-capable" content="yes">
+    <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+    <link rel="manifest" href="/manifest.json">
+    <link rel="apple-touch-icon" href="/icons/icon-192.png">
     <meta name="csrf-token" content="{{ csrf_token() }}">
 
     <title>{{ $title ?? config('app.name', 'UjianKu') }}</title>
@@ -117,6 +121,10 @@
             <span class="hidden rounded-full bg-brand-50 px-3 py-1 text-xs font-semibold capitalize text-brand-700 sm:inline">
                 {{ auth()->user()->role }}
             </span>
+
+            <button type="button" data-install-app class="hidden min-h-10 rounded-xl bg-brand-600 px-3 text-xs font-semibold text-white">
+                Pasang Aplikasi
+            </button>
         </header>
 
         <main id="main-content" class="mx-auto w-full max-w-7xl px-4 py-5 sm:px-6 lg:px-8 lg:py-8">
