@@ -55,6 +55,7 @@
                     ['label' => 'Ringkasan', 'route' => route('guru.index'), 'pattern' => 'guru.index'],
                     ['label' => 'Bank Soal', 'route' => route('guru.questions.index'), 'pattern' => 'guru.questions.*'],
                     ['label' => 'Ujian', 'route' => route('guru.exams.index'), 'pattern' => 'guru.exams.*'],
+                    ['label' => 'Pengawasan', 'route' => route('guru.monitoring.index'), 'pattern' => 'guru.monitoring.*'],
                 ],
                 default => [
                     ['label' => 'Ringkasan', 'route' => route('siswa.index'), 'pattern' => 'siswa.index'],

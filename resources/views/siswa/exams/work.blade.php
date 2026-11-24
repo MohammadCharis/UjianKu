@@ -141,5 +141,24 @@
                 </div>
             </div>
         </x-modal>
+
+        <div data-lock-overlay class="fixed inset-0 z-50 hidden items-center justify-center bg-slate-950/85 p-6 text-center text-white">
+            <div class="max-w-sm">
+                <p class="text-2xl font-bold">Ujian Terkunci</p>
+                <p class="mt-2 text-sm text-slate-200">Anda telah mencapai batas pelanggaran. Menunggu guru membuka kunci.</p>
+            </div>
+        </div>
+
+        <x-modal name="violation-warning">
+            <div class="p-5">
+                <h2 class="text-lg font-semibold text-red-700">Peringatan Pelanggaran</h2>
+                <p class="mt-2 text-sm text-slate-600">
+                    Pelanggaran ke-<span data-violation-count></span> dari <span data-violation-max></span>: <span data-violation-type></span>.
+                </p>
+                <div class="mt-5 text-end">
+                    <x-button data-modal-close variant="danger">Saya Mengerti</x-button>
+                </div>
+            </div>
+        </x-modal>
     </div>
 </x-student-layout>
