@@ -5,6 +5,7 @@ namespace App\Http\Controllers\Siswa;
 use App\Http\Controllers\Controller;
 use App\Http\Requests\Siswa\AnswerExamQuestionRequest;
 use App\Http\Requests\Siswa\JoinExamRequest;
+use App\Http\Requests\Siswa\RecordViolationRequest;
 use App\Http\Requests\Siswa\SubmitExamRequest;
 use App\Models\Exam;
 use App\Models\ExamSession;
@@ -136,6 +137,7 @@ class ExamController extends Controller
 
         return response()->json([
             'status' => 'ok',
+            'session_status' => $examSession->status,
             'server_now_ms' => (int) (now()->valueOf() * 1000),
             'remaining_seconds' => $examSession->remainingSeconds(),
         ]);
@@ -175,5 +177,88 @@ class ExamController extends Controller
         $answers = $examSession->answers()->with('option')->get()->keyBy('question_id');
 
         return view('siswa.exams.result', compact('examSession', 'exam', 'questions', 'answers'));
+    }
+
+    public function recordViolation(RecordViolationRequest $request, ExamSession $examSession): JsonResponse
+    {
+        if (in_array($examSession->status, [ExamSession::SELESAI, ExamSession::DISKUALIFIKASI], true)) {
+            abort(403);
+        }
+
+        $data = $request->validated();
+
+        if ($request->filled('violation_id')) {
+            $violation = Violation::query()
+                ->where('id', $data['violation_id'])
+                ->where('session_id', $examSession->id)
+                ->firstOrFail();
+
+            $duration = (int) ($data['duration_seconds'] ?? $violation->duration_seconds);
+
+            $violation->update([
+                'type' => $data['type'],
+                'duration_seconds' => $duration,
+                'level' => $this->violationLevel($duration),
+            ]);
+
+            return response()->json([
+                'status' => 'updated',
+                'violation_id' => $violation->id,
+                'violation_count' => $examSession->violation_count,
+                'session_status' => $examSession->status,
+                'max_violations' => $examSession->exam->max_violations,
+            ]);
+        }
+
+        $duration = (int) ($data['duration_seconds'] ?? 0);
+
+        $violation = Violation::create([
+            'session_id' => $examSession->id,
+            'handled_by' => null,
+            'type' => $data['type'],
+            'level' => $this->violationLevel($duration),
+            'occurred_at' => now()->subSeconds($duration),
+            'duration_seconds' => $duration,
+            'action' => null,
+            'note' => null,
+        ]);
+
+        $examSession->increment('violation_count');
+        $examSession->refresh();
+
+        $status = $examSession->status;
+
+        if ($examSession->violation_count >= $examSession->exam->max_violations) {
+            if ($examSession->exam->lock_mode === Exam::AUTO_SUBMIT) {
+                $this->gradingService->grade($examSession);
+                $examSession->update(['status' => ExamSession::SELESAI, 'finished_at' => now()]);
+                $status = ExamSession::SELESAI;
+            } else {
+                $examSession->update(['status' => ExamSession::TERKUNCI]);
+                $status = ExamSession::TERKUNCI;
+            }
+
+            $examSession->refresh();
+        }
+
+        return response()->json([
+            'status' => 'recorded',
+            'violation_id' => $violation->id,
+            'violation_count' => $examSession->violation_count,
+            'session_status' => $status,
+            'max_violations' => $examSession->exam->max_violations,
+            'locked' => $status === ExamSession::TERKUNCI,
+            'auto_submitted' => $status === ExamSession::SELESAI,
+            'redirect' => $status === ExamSession::SELESAI ? route('siswa.exams.result', $examSession) : null,
+        ]);
+    }
+
+    private function violationLevel(int $durationSeconds): string
+    {
+        return match (true) {
+            $durationSeconds < 5 => Violation::RINGAN,
+            $durationSeconds <= 30 => Violation::SEDANG,
+            default => Violation::BERAT,
+        };
     }
 }

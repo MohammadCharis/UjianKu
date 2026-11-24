@@ -11,7 +11,9 @@
         data-server-now-ms="{{ $serverNowMs }}"
         data-answer-url="{{ route('siswa.exams.answers', $session) }}"
         data-heartbeat-url="{{ route('siswa.exams.heartbeat', $session) }}"
+        data-violation-url="{{ route('siswa.exams.violations', $session) }}"
         data-submit-url="{{ route('siswa.exams.submit', $session) }}"
+        data-locked="{{ $session->status === 'terkunci' ? 'true' : 'false' }}"
         class="pb-24"
     >
         <div class="mb-3 flex items-center justify-between gap-3">
